@@ -6,7 +6,7 @@ Build instructions :
 
 ```bash
 https://github.com/theobslhc/icpcuda_helloworld.git
-cd ICPCUDA
+cd icpcuda_helloworld
 
 mkdir build
 cd build
