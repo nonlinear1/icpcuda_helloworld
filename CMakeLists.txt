@@ -10,7 +10,7 @@ find_package(Eigen3 REQUIRED)
 find_package(Sophus REQUIRED)
 find_package(Pangolin REQUIRED)
 find_package(icpcuda REQUIRED)
-      
+
 include_directories(${CUDA_INCLUDE_DIRS})
 include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(${Sophus_INCLUDE_DIR})
@@ -32,5 +32,3 @@ target_link_libraries(ICPHW
                       ${Pangolin_LIBRARIES}
                       ${ICPCUDA_LIBRARIES}
 )
-
-

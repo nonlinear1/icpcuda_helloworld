@@ -12,11 +12,17 @@ find_package(PkgConfig)
 pkg_check_modules(ICPCUDA QUIET icpcuda)
 
 find_path(ICPCUDA_INCLUDE_DIR icpcuda/ICPOdometry.h
-          HINTS /usr/local/include
+          PATHS
+          ${CMAKE_INSTALL_PREFIX}/include
+          ${CMAKE_SOURCE_DIR}/../build/include
+          ${CMAKE_SOURCE_DIR}/build/include
           PATH_SUFFIXES icpcuda )
 
 find_library(ICPCUDA_LIBRARY NAMES libicpcuda icpcuda
-             HINTS /usr/local/lib
+             PATHS
+             ${CMAKE_INSTALL_PREFIX}/lib
+             ${CMAKE_SOURCE_DIR}/../build/lib
+             ${CMAKE_SOURCE_DIR}/build/lib
              PATH_SUFFIXES icpcuda )
 
 include(FindPackageHandleStandardArgs)
