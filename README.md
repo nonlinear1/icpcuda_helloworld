@@ -18,6 +18,6 @@ make
 Run like;
 
 ```bash
-./ICP ~/Desktop/rgbd_dataset_freiburg1_desk/ -v
+./ICPHW ~/Desktop/rgbd_dataset_freiburg1_desk/ -v
 ```
 See [ICPCUDA](https://github.com/theobslhc/ICPCUDA) repository for details
