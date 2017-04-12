@@ -5,7 +5,7 @@ Requires CUDA, [Pangolin](https://github.com/stevenlovegrove/Pangolin), [Eigen](
 Build instructions :
 
 ```bash
-git clone https://github.com/theobslhc/ICPCUDA.git
+https://github.com/theobslhc/icpcuda_helloworld.git
 cd ICPCUDA
 
 mkdir build
