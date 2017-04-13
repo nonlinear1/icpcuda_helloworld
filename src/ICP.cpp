@@ -23,7 +23,7 @@ void tokenize(const std::string & str, std::vector<std::string> & tokens, std::s
     }
 }
 
-uint64_t loadDepth(pangolin::Image<unsigned short> & depth)
+uint64_t loadNextDepth(pangolin::Image<unsigned short> & depth, std::string& depthPath)
 {
     std::string currentLine;
     std::vector<std::string> tokens;
@@ -40,6 +40,8 @@ uint64_t loadDepth(pangolin::Image<unsigned short> & depth)
 
     std::string depthLoc = directory;
     depthLoc.append(tokens[1]);
+
+    depthPath = depthLoc;
 
     pangolin::TypedImage depthRaw = pangolin::LoadImage(depthLoc, pangolin::ImageFileTypePng);
 
@@ -64,6 +66,72 @@ uint64_t loadDepth(pangolin::Image<unsigned short> & depth)
     depthRaw.Dealloc();
 
     return time;
+}
+
+void outputTransformedDepthMap(pangolin::Image<unsigned short> & depth, std::string& depthPath, const Eigen::Matrix4f & transformation)
+{
+    pangolin::Image<unsigned char> transformedDepthMap((unsigned char*)depth.ptr, depth.w, depth.h, depth.w * sizeof(unsigned char));
+
+    std::pair<short, short> minmax = depth.MinMax();
+    short min = minmax.first;
+    short max = minmax.second;
+    short diff = max - min;
+    for(unsigned int i = 0; i < 480; i++)
+    {
+        for(unsigned int j = 0; j < 640; j++)
+        {
+            transformedDepthMap.RowPtr(i)[j] = (depth(j, i)-min)*255 / diff;
+        }
+    }
+    for(unsigned int i = 0; i < 480; i++)
+    {
+        for(unsigned int j = 0; j < 640; j++)
+        {
+            Eigen::Vector4f position(i,j,transformedDepthMap(j, i), 1);
+            transformedDepthMap.RowPtr(i)[j] = 255;
+            position = transformation * position;
+            if((int)position[0] >= 0 && (int)position[0] < 480
+            && (int)position[1] >= 0 && (int)position[1] < 640)
+            {
+                transformedDepthMap.RowPtr((short)position[0])[(short)position[1]] = (short)position[2];
+            }
+        }
+    }
+    minmax = transformedDepthMap.MinMax();
+    min = minmax.first;
+    max = minmax.second;
+    diff = max - min;
+    for(unsigned int i = 0; i < 480; i++)
+    {
+        for(unsigned int j = 0; j < 640; j++)
+        {
+            if(transformedDepthMap(j, i) != 255) {
+                transformedDepthMap.RowPtr(i)[j] = (transformedDepthMap(j, i)-min) * 51 / diff;
+            }
+        }
+    }
+    /*
+    for(unsigned int i = 0; i < 480; i++)
+    {
+        for(unsigned int j = 0; j < 640; j++)
+        {
+            //apply transformation
+            //position = transformation * position;
+            /*
+            if(position[0] >= 0 && position[0] < 480
+            && position[1] >= 0 && position[1] < 640)
+            {
+                //std::cout << "put value " << (int)position[2] << " in pixel (" << (int)position[0] << ", " << (int)position[1] << ")" << std::endl;
+                transformedDepthMap.RowPtr((int)position[0])[(int)position[1]] = (int)position[2];
+            }
+            //transformedDepthMap.RowPtr(i)[j] = depth(j, i);
+        }
+    }*/
+    pangolin::PixelFormat fmt = pangolin::PixelFormatFromString("GRAY8");
+    int pngPos = depthPath.find(".png");
+    std::string path = depthPath.substr(0,pngPos);
+    pangolin::SaveImage(transformedDepthMap, fmt, path+"_t.png", pangolin::ImageFileTypePng);
+    //transformedDepthMap.Dealloc();
 }
 
 void outputFreiburg(const std::string filename, const uint64_t & timestamp, const Eigen::Matrix4f & currentPose)
@@ -118,8 +186,9 @@ int main(int argc, char * argv[])
 
     assert(!asFile.eof() && asFile.is_open());
 
-    loadDepth(firstRaw);
-    uint64_t timestamp = loadDepth(secondRaw);
+    std::string firstDepthPath, secondDepthPath;
+    loadNextDepth(firstRaw, firstDepthPath);
+    uint64_t timestamp = loadNextDepth(secondRaw, secondDepthPath);
 
     Sophus::SE3d T_wc_prev;
     Sophus::SE3d T_wc_curr;
@@ -134,7 +203,7 @@ int main(int argc, char * argv[])
 
     std::string dev(prop.name);
 
-    std::cout << dev << std::endl;
+    std::cout << "Device : " << dev << std::endl;
 
     float mean = std::numeric_limits<float>::max();
     int count = 0;
@@ -146,9 +215,13 @@ int main(int argc, char * argv[])
     int bestBlocks = blocks;
     float best = mean;
 
+    bool stepByStep = false;
+
     if(argc == 3)
     {
         std::string searchArg(argv[2]);
+
+        stepByStep = (searchArg.compare("-s") == 0);
 
         if(searchArg.compare("-v") == 0)
         {
@@ -213,6 +286,7 @@ int main(int argc, char * argv[])
 
     while(!asFile.eof())
     {
+
         icpOdom.initICPModel(firstRaw.ptr);
         icpOdom.initICP(secondRaw.ptr);
 
@@ -225,6 +299,8 @@ int main(int argc, char * argv[])
         icpOdom.getIncrementalTransformation(T_prev_curr, threads, blocks);
 
         T_wc_curr = T_wc_prev * T_prev_curr;
+                    // T_wc_curr is now the transformation to get 
+                    // from very first frame to current frame
 
         uint64_t tock = getCurrTime();
 
@@ -232,15 +308,33 @@ int main(int argc, char * argv[])
         count++;
 
         std::cout << std::setprecision(4) << std::fixed
-                  << "\rICP: "
+                  << "\rICP : "
                   << mean << "ms";
                   std::cout.flush();
 
+        Eigen::Vector3f trans = T_wc_curr.cast<float>().matrix().topRightCorner(3, 1);
+        Eigen::Matrix3f rot = T_wc_curr.cast<float>().matrix().topLeftCorner(3, 3);
+        if(stepByStep)
+        {
+            std::cout << std::endl << "ICP between " << firstDepthPath << " and " << secondDepthPath << " : " << std::endl;
+            std::cout << "Found a rotation of : " << std::endl;
+            std::cout << rot(0) << " " << "0" << " " << "0" << " " << std::endl;
+            std::cout << "0" << " " << rot(1) << " " << "0" << " " << std::endl;
+            std::cout << "0" << " " << "0" << " " << rot(2) << " " << std::endl;
+            std::cout << "Found a translation of : " << std::endl;
+            std::cout << trans(0) << " " << trans(1) << " " << trans(2) << " " << std::endl;
+            std::cout << std::endl << "Press enter to continue..." << std::endl;
+            std::cin.ignore();
+        }
+
+        outputTransformedDepthMap(firstRaw, firstDepthPath, T_prev_curr.cast<float>().matrix());
+
         std::swap(firstRaw, secondRaw);
+        std::swap(firstDepthPath, secondDepthPath);
 
         outputFreiburg("output.poses", timestamp, T_wc_curr.cast<float>().matrix());
 
-        timestamp = loadDepth(secondRaw);
+        timestamp = loadNextDepth(secondRaw, secondDepthPath);
     }
 
     std::cout << std::endl;
