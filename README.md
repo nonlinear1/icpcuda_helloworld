@@ -1,6 +1,6 @@
 # icpcuda_helloworld
 
-Requires CUDA, [Pangolin](https://github.com/stevenlovegrove/Pangolin), [Eigen](https://github.com/stevenlovegrove/eigen) and [Sophus](https://github.com/stevenlovegrove/Sophus), and [ICPCUDA](https://github.com/theobslhc/ICPCUDA).
+Requires CUDA, [Pangolin](https://github.com/theobslhc/Pangolin), [Eigen](https://github.com/stevenlovegrove/eigen) and [Sophus](https://github.com/stevenlovegrove/Sophus), and [ICPCUDA](https://github.com/theobslhc/ICPCUDA).
 
 Build instructions :
 
@@ -11,7 +11,7 @@ cd icpcuda_helloworld
 mkdir build
 cd build
 
-cmake ../src
+cmake ..
 make
 ```
 
