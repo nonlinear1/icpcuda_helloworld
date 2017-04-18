@@ -11,7 +11,7 @@ cd icpcuda_helloworld
 mkdir build
 cd build
 
-cmake ../src
+cmake ..
 make
 ```
 
