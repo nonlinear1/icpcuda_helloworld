@@ -5,6 +5,12 @@
 #include <chrono>
 #include <pangolin/image/image_io.h>
 
+#include <libfreenect2/libfreenect2.hpp>
+#include <libfreenect2/frame_listener_impl.h>
+#include <libfreenect2/registration.h>
+#include <libfreenect2/packet_pipeline.h>
+#include <libfreenect2/logger.h>
+
 std::ifstream asFile;
 std::string directory;
 
@@ -110,23 +116,6 @@ void outputTransformedDepthMap(pangolin::Image<unsigned short> & depth, std::str
             }
         }
     }
-    /*
-    for(unsigned int i = 0; i < 480; i++)
-    {
-        for(unsigned int j = 0; j < 640; j++)
-        {
-            //apply transformation
-            //position = transformation * position;
-            /*
-            if(position[0] >= 0 && position[0] < 480
-            && position[1] >= 0 && position[1] < 640)
-            {
-                //std::cout << "put value " << (int)position[2] << " in pixel (" << (int)position[0] << ", " << (int)position[1] << ")" << std::endl;
-                transformedDepthMap.RowPtr((int)position[0])[(int)position[1]] = (int)position[2];
-            }
-            //transformedDepthMap.RowPtr(i)[j] = depth(j, i);
-        }
-    }*/
     pangolin::PixelFormat fmt = pangolin::PixelFormatFromString("GRAY8");
     int pngPos = depthPath.find(".png");
     std::string path = depthPath.substr(0,pngPos);
@@ -299,7 +288,7 @@ int main(int argc, char * argv[])
         icpOdom.getIncrementalTransformation(T_prev_curr, threads, blocks);
 
         T_wc_curr = T_wc_prev * T_prev_curr;
-                    // T_wc_curr is now the transformation to get 
+                    // T_wc_curr is now the transformation to get
                     // from very first frame to current frame
 
         uint64_t tock = getCurrTime();
