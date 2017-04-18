@@ -6,12 +6,11 @@
 # also defined, but not for general use are
 #  FREENECT2_freenect_LIBRARY, where to find the FREENECT library.
 
-FIND_PATH(FREENECT2_INCLUDE_DIR libfreenect2.hpp
+FIND_PATH(FREENECT2_INCLUDE_DIR libfreenect2/libfreenect2.hpp
   /usr/local/include
-  /usr/local/include/libfreenect2
   /usr/include
-  /usr/include/libfreenect2
-  $ENV{HOME}/freenect2/include/libfreenect2
+  $ENV{HOME}/freenect2/include
+  NO_DEFAULT_PATH
 )
 
 FIND_LIBRARY(FREENECT2_LIBRARY freenect2
