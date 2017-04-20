@@ -5,8 +5,6 @@ project(ICPHW)
 # Add local path for finding packages, set the local version first
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules" ${CMAKE_MODULE_PATH})
 
-set(OPT_ROOT_DIR "/home/theobucd/Documents/Projects/OptProj/Opt/API/release")
-
 find_package(CUDA REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Sophus REQUIRED)
