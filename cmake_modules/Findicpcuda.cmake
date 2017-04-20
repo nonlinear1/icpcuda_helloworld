@@ -13,6 +13,7 @@ pkg_check_modules(ICPCUDA QUIET icpcuda)
 
 find_path(ICPCUDA_INCLUDE_DIR icpcuda/ICPOdometry.h
           PATHS
+          $ENV{HOME}
           ${CMAKE_INSTALL_PREFIX}/include
           ${CMAKE_SOURCE_DIR}/../build/include
           ${CMAKE_SOURCE_DIR}/build/include
@@ -20,6 +21,7 @@ find_path(ICPCUDA_INCLUDE_DIR icpcuda/ICPOdometry.h
 
 find_library(ICPCUDA_LIBRARY NAMES libicpcuda icpcuda
              PATHS
+             $ENV{HOME}
              ${CMAKE_INSTALL_PREFIX}/lib
              ${CMAKE_SOURCE_DIR}/../build/lib
              ${CMAKE_SOURCE_DIR}/build/lib
@@ -35,4 +37,3 @@ mark_as_advanced(ICPCUDA_INCLUDE_DIR ICPCUDA_LIBRARY )
 
 set(ICPCUDA_LIBRARIES ${ICPCUDA_LIBRARY} )
 set(ICPCUDA_INCLUDE_DIRS ${ICPCUDA_INCLUDE_DIR} )
-

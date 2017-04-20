@@ -10,6 +10,7 @@ FIND_PATH(FREENECT2_INCLUDE_DIR libfreenect2/libfreenect2.hpp
   /usr/local/include
   /usr/include
   $ENV{HOME}/freenect2/include
+  $ENV{HOME}/libfreenect2/include
   NO_DEFAULT_PATH
 )
 
@@ -17,6 +18,7 @@ FIND_LIBRARY(FREENECT2_LIBRARY freenect2
   /usr/local/lib
   /usr/lib
   $ENV{HOME}/freenect2/lib
+  $ENV{HOME}/libfreenect2/lib
 )
 
 MARK_AS_ADVANCED(
