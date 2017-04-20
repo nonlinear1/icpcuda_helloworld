@@ -1,6 +1,6 @@
 # icpcuda_helloworld
 
-Requires CUDA, [Pangolin](https://github.com/theobslhc/Pangolin), [Eigen](https://github.com/stevenlovegrove/eigen) and [Sophus](https://github.com/stevenlovegrove/Sophus), [libfreenect2](https://github.com/OpenKinect/libfreenect2) and [ICPCUDA](https://github.com/theobslhc/ICPCUDA).
+Requires CUDA, [Pangolin](https://github.com/theobslhc/Pangolin), [Eigen](https://github.com/stevenlovegrove/eigen), [Sophus](https://github.com/stevenlovegrove/Sophus), [libfreenect2](https://github.com/OpenKinect/libfreenect2), [Opt](https://github.com/niessner/Opt) and [ICPCUDA](https://github.com/theobslhc/ICPCUDA).
 
 Build instructions :
 
